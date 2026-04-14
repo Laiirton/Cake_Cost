@@ -1,0 +1,121 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import {
+  LayoutDashboard,
+  Wheat,
+  BookOpen,
+  Calculator,
+  Users,
+  ShoppingBag,
+  ListChecks,
+  DollarSign,
+  Settings,
+  LogOut,
+  X,
+} from 'lucide-react'
+
+const navItems = [
+  {
+    section: 'Menu',
+    items: [
+      { href: '/dashboard', label: 'Painel', icon: LayoutDashboard },
+    ],
+  },
+  {
+    section: 'Cadastros',
+    items: [
+      { href: '/dashboard/ingredientes', label: 'Ingredientes', icon: Wheat },
+      { href: '/dashboard/receitas', label: 'Receitas', icon: BookOpen },
+      { href: '/dashboard/calculadora', label: 'Calculadora', icon: Calculator },
+      { href: '/dashboard/clientes', label: 'Clientes', icon: Users },
+    ],
+  },
+  {
+    section: 'Operacional',
+    items: [
+      { href: '/dashboard/pedidos', label: 'Pedidos', icon: ShoppingBag },
+      { href: '/dashboard/producao', label: 'Produção', icon: ListChecks },
+      { href: '/dashboard/financeiro', label: 'Financeiro', icon: DollarSign },
+    ],
+  },
+  {
+    section: 'Sistema',
+    items: [
+      { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
+    ],
+  },
+]
+
+interface SidebarProps {
+  isOpen: boolean
+  onClose: () => void
+}
+
+export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const pathname = usePathname()
+
+  const isActive = (href: string) => {
+    if (href === '/dashboard') return pathname === '/dashboard'
+    return pathname.startsWith(href)
+  }
+
+  return (
+    <>
+      {isOpen && <div className="mobile-overlay" onClick={onClose} />}
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-logo">
+          <div className="sidebar-logo-icon">🧁</div>
+          <div className="sidebar-logo-text">
+            <h2>Cake Cost</h2>
+            <span>Gestão de Confeitaria</span>
+          </div>
+          <button
+            className="btn-ghost btn-icon"
+            onClick={onClose}
+            style={{ marginLeft: 'auto', display: 'none', color: 'white' }}
+            id="close-sidebar-btn"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        <nav className="sidebar-nav">
+          {navItems.map((section) => (
+            <div key={section.section}>
+              <div className="sidebar-section-title">{section.section}</div>
+              {section.items.map((item) => {
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`sidebar-link ${isActive(item.href) ? 'active' : ''}`}
+                    onClick={onClose}
+                  >
+                    <Icon size={20} />
+                    {item.label}
+                  </Link>
+                )
+              })}
+            </div>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          <form action="/auth/signout" method="post">
+            <button
+              type="submit"
+              className="sidebar-link"
+              style={{ width: '100%', border: 'none', background: 'none', cursor: 'pointer' }}
+            >
+              <LogOut size={20} />
+              Sair
+            </button>
+          </form>
+        </div>
+      </aside>
+    </>
+  )
+}
