@@ -165,6 +165,8 @@ export default function CalculadoraPage() {
     setTimeout(() => setToast(null), 3000)
   }, [])
 
+  const getDefaultExpandedSections = () => new Set(RECIPE_SECTIONS.map((section) => section.key))
+
   const resetSimulation = useCallback(
     (recipeId = '') => {
       const recipe = recipeId ? recipesMap.get(recipeId) : undefined
@@ -184,6 +186,13 @@ export default function CalculadoraPage() {
     },
     [defaults, recipesMap]
   )
+
+  const startNewSimulation = useCallback(() => {
+    resetSimulation(selectedRecipeId)
+    setPresetSearch('')
+    setExpandedSections(getDefaultExpandedSections())
+    showToast('success', 'Simulacao reiniciada.')
+  }, [resetSimulation, selectedRecipeId, showToast])
 
   const applyPreset = useCallback(
     (preset: CalculatorPreset) => {
@@ -515,7 +524,7 @@ export default function CalculadoraPage() {
                 />
               </div>
 
-              <button className="btn btn-secondary btn-sm" onClick={() => resetSimulation(selectedRecipeId)} style={{ width: '100%', marginBottom: 12 }}>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={startNewSimulation} style={{ width: '100%', marginBottom: 12 }}>
                 <Plus size={14} />
                 Nova simulacao
               </button>
@@ -617,17 +626,17 @@ export default function CalculadoraPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn btn-secondary" onClick={() => resetSimulation(selectedRecipeId)}>
+                  <button type="button" className="btn btn-secondary" onClick={startNewSimulation}>
                     Nova simulacao
                   </button>
                   {selectedPreset && (
-                    <button className="btn btn-secondary" onClick={openDuplicatePreset}>
+                    <button type="button" className="btn btn-secondary" onClick={openDuplicatePreset}>
                       <Copy size={16} />
                       Duplicar
                     </button>
                   )}
                   {selectedPreset && (
-                    <button className="btn btn-secondary" onClick={handleUpdatePreset} disabled={savingPreset}>
+                    <button type="button" className="btn btn-secondary" onClick={handleUpdatePreset} disabled={savingPreset}>
                       <Save size={16} />
                       Atualizar modelo
                     </button>
@@ -640,6 +649,7 @@ export default function CalculadoraPage() {
                   )}
                   {selectedPreset && (
                     <button
+                      type="button"
                       className="btn btn-secondary"
                       onClick={handleDeletePreset}
                       disabled={deletingPreset}
@@ -728,7 +738,7 @@ export default function CalculadoraPage() {
                 <div className="card">
                   <div className="card-header">
                     <h3>Extras e personalizacao</h3>
-                    <button className="btn btn-secondary btn-sm" onClick={addExtra}>
+                    <button type="button" className="btn btn-secondary btn-sm" onClick={addExtra}>
                       <Plus size={14} />
                       Adicionar extra
                     </button>
@@ -757,6 +767,7 @@ export default function CalculadoraPage() {
                               style={{ padding: '8px 10px', fontSize: '0.8125rem' }}
                             />
                             <button
+                              type="button"
                               className="btn btn-ghost btn-icon btn-sm"
                               onClick={() => removeExtra(extra.uid)}
                               style={{ color: 'var(--danger-500)' }}
