@@ -41,14 +41,14 @@ const navItems = [
   {
     section: 'Operacao',
     items: [
-      { href: '/dashboard/producao', label: 'Producao', icon: ListChecks },
+      { href: '/dashboard/producao', label: 'Produção', icon: ListChecks },
       { href: '/dashboard/financeiro', label: 'Financeiro', icon: DollarSign },
     ],
   },
   {
     section: 'Sistema',
     items: [
-      { href: '/dashboard/configuracoes', label: 'Configuracoes', icon: Settings },
+      { href: '/dashboard/configuracoes', label: 'Configurações', icon: Settings },
     ],
   },
 ]
@@ -74,7 +74,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <div className="sidebar-logo-icon">CC</div>
           <div className="sidebar-logo-text">
             <h2>Cake Cost</h2>
-            <span>Gestao de Confeitaria</span>
+            <span>Gestão de Confeitaria</span>
           </div>
           <button
             className="btn-ghost btn-icon mobile-close-btn"

@@ -36,7 +36,7 @@ interface TaskFormState {
 const statusOptions = [
   { value: 'todo', label: 'A fazer' },
   { value: 'doing', label: 'Em andamento' },
-  { value: 'done', label: 'Concluido' },
+  { value: 'done', label: 'Concluído' },
 ]
 
 function getStatusBadge(status: string) {
@@ -85,8 +85,8 @@ export default function ProducaoPage() {
       setItems((tasksRes.data || []) as Task[])
       setOrders((ordersRes.data || []) as Order[])
     } catch (error) {
-      console.error('Erro ao carregar producao:', error)
-      showToast('error', 'Nao foi possivel carregar as tarefas.')
+      console.error('Erro ao carregar produção:', error)
+      showToast('error', 'Não foi possível carregar as tarefas.')
     } finally {
       setLoading(false)
     }
@@ -133,7 +133,7 @@ export default function ProducaoPage() {
 
   const handleSave = async () => {
     if (!form.title.trim()) {
-      setFormError('Informe o titulo da tarefa.')
+      setFormError('Informe o título da tarefa.')
       return
     }
 
@@ -177,7 +177,7 @@ export default function ProducaoPage() {
     try {
       const { error } = await supabase.from('production_tasks').delete().eq('id', id)
       if (error) throw error
-      showToast('success', 'Tarefa excluida!')
+      showToast('success', 'Tarefa excluída!')
       load()
     } catch (error) {
       showToast('error', getErrorMessage(error, 'Erro ao excluir tarefa'))
@@ -242,8 +242,8 @@ export default function ProducaoPage() {
 
       <div className="page-header">
         <div>
-          <h1>Producao</h1>
-          <p>Visual para executar, nao so listar tarefa.</p>
+          <h1>Produção</h1>
+          <p>Visual para executar, não só listar tarefa.</p>
         </div>
         <button className="btn btn-primary" onClick={openNew}>
           <Plus size={18} />
@@ -279,7 +279,7 @@ export default function ProducaoPage() {
         <select className="form-select" style={{ width: 180 }} value={timeFilter} onChange={(event) => setTimeFilter(event.target.value as 'all' | 'today' | 'week' | 'overdue')}>
           <option value="all">Qualquer prazo</option>
           <option value="today">Hoje</option>
-          <option value="week">Proximos 7 dias</option>
+          <option value="week">Próximos 7 dias</option>
           <option value="overdue">Atrasadas</option>
         </select>
       </div>
@@ -288,7 +288,7 @@ export default function ProducaoPage() {
         <div className="card">
           <div className="empty-state">
             <ListChecks size={48} />
-            <h3>Nenhuma tarefa nessa visao</h3>
+            <h3>Nenhuma tarefa nessa visão</h3>
             <p>Crie tarefas manuais ou gere automaticamente a partir dos pedidos.</p>
           </div>
         </div>
@@ -329,7 +329,7 @@ export default function ProducaoPage() {
                           )}
                           {nextStatus && (
                             <button className="btn btn-primary btn-sm" onClick={() => moveTask(item, nextStatus)}>
-                              Avancar
+                              Avançar
                             </button>
                           )}
                         </div>
@@ -358,7 +358,7 @@ export default function ProducaoPage() {
             <div className="modal-body">
               {formError && <div className="form-error" style={{ marginBottom: 16 }}>{formError}</div>}
               <div className="form-group">
-                <label className="form-label">Titulo</label>
+                <label className="form-label">Título</label>
                 <input className="form-input" value={form.title} onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))} />
               </div>
               <div className="form-group">
@@ -372,8 +372,8 @@ export default function ProducaoPage() {
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Estacao</label>
-                  <input className="form-input" value={form.station} onChange={(event) => setForm((current) => ({ ...current, station: event.target.value }))} placeholder="Ex: Decoracao" />
+                  <label className="form-label">Estação</label>
+                  <input className="form-input" value={form.station} onChange={(event) => setForm((current) => ({ ...current, station: event.target.value }))} placeholder="Ex: Decoração" />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Status</label>
@@ -389,7 +389,7 @@ export default function ProducaoPage() {
                 <input className="form-input" type="datetime-local" value={form.due_at} onChange={(event) => setForm((current) => ({ ...current, due_at: event.target.value }))} />
               </div>
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Observacoes</label>
+                <label className="form-label">Observações</label>
                 <textarea className="form-textarea" value={form.notes} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} />
               </div>
             </div>

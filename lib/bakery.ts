@@ -347,8 +347,8 @@ export function buildProductionTasks(params: {
 
   if (sections.has('decoracao')) {
     seeds.push({
-      title: `Finalizar decoracao - ${params.orderTitle}`,
-      station: 'Decoracao',
+      title: `Finalizar decoração - ${params.orderTitle}`,
+      station: 'Decoração',
       dueDate: addDays(anchorDate, -1),
       dueHour: 15,
       dueMinute: 0,

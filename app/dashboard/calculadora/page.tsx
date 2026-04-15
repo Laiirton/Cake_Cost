@@ -272,8 +272,7 @@ export default function CalculadoraPage() {
       }
     } catch (error) {
       console.error('Erro ao carregar calculadora:', error)
-      showToast('error', 'Nao foi possivel carregar os modelos e receitas.')
-    } finally {
+      showToast('error', 'Não foi possível carregar os modelos e receitas.')    } finally {
       setLoading(false)
     }
   }, [selectedRecipeId, showToast, supabase])
@@ -472,7 +471,7 @@ export default function CalculadoraPage() {
 
       setPresets((previous) => previous.filter((preset) => preset.id !== selectedPreset.id))
       resetSimulation(selectedRecipeId)
-      showToast('success', 'Modelo excluido!')
+      showToast('success', 'Modelo excluído!')
     } catch (error) {
       showToast('error', getErrorMessage(error, 'Erro ao excluir modelo'))
     } finally {
@@ -575,7 +574,7 @@ export default function CalculadoraPage() {
                         {recipe?.name || 'Receita removida'} {recipe?.category ? `• ${recipe.category}` : ''}
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                        <span className="badge badge-neutral">{preset.servings || parseYieldToServings(recipe?.yield_label || '')} porcoes</span>
+                        <span className="badge badge-neutral">{preset.servings || parseYieldToServings(recipe?.yield_label || '')} porções</span>
                         <span style={{ fontWeight: 700, color: 'var(--brand-600)' }}>
                           {formatCurrency(presetPricing?.salePrice || 0)}
                         </span>
@@ -625,7 +624,7 @@ export default function CalculadoraPage() {
           <div className="card">
             <div className="empty-state">
               <Save size={56} />
-              <h3>Escolha uma receita para comecar</h3>
+              <h3>Escolha uma receita para começar</h3>
               <p>Depois ajuste custos, markup e salve um modelo pronto para usar nos pedidos.</p>
             </div>
           </div>
@@ -638,7 +637,7 @@ export default function CalculadoraPage() {
                     Contexto atual
                   </div>
                   <div style={{ fontWeight: 800, fontSize: '1.125rem' }}>
-                    {selectedPreset ? selectedPreset.name : `Simulacao de ${selectedRecipe.name}`}
+                    {selectedPreset ? selectedPreset.name : `Simulação de ${selectedRecipe.name}`}
                   </div>
                   <div className="text-sm text-muted">
                     {selectedPreset
@@ -648,7 +647,7 @@ export default function CalculadoraPage() {
                 </div>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button type="button" className="btn btn-secondary" onClick={startNewSimulation}>
-                    Nova simulacao
+                    Nova simulação
                   </button>
                   {selectedPreset && (
                     <button type="button" className="btn btn-secondary" onClick={openDuplicatePreset}>
@@ -758,7 +757,7 @@ export default function CalculadoraPage() {
 
                 <div className="card">
                   <div className="card-header">
-                    <h3>Extras e personalizacao</h3>
+                    <h3>Extras e personalização</h3>
                     <button type="button" className="btn btn-secondary btn-sm" onClick={addExtra}>
                       <Plus size={14} />
                       Adicionar extra
@@ -767,7 +766,7 @@ export default function CalculadoraPage() {
                   <div className="card-body" style={{ padding: extraItems.length > 0 ? '16px 24px' : '0 24px' }}>
                     {extraItems.length === 0 ? (
                       <div style={{ padding: '20px 0', textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.8125rem' }}>
-                        Nenhum extra adicionado. Use para topper, flores, caixas especiais ou itens cobrados a parte.
+                        Nenhum extra adicionado. Use para topper, flores, caixas especiais ou itens cobrados à parte.
                       </div>
                     ) : (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -809,7 +808,7 @@ export default function CalculadoraPage() {
                   <div className="card-body">
                     <div className="form-row">
                       <div className="form-group">
-                        <label className="form-label">Porcoes planejadas</label>
+                        <label className="form-label">Porções planejadas</label>
                         <input
                           className="form-input"
                           type="number"
@@ -817,7 +816,7 @@ export default function CalculadoraPage() {
                           value={servingsTarget || ''}
                           onChange={(event) => setServingsTarget(parseInt(event.target.value, 10) || 0)}
                         />
-                        <div className="form-hint">Ajuda a enxergar custo e venda por porcao.</div>
+                        <div className="form-hint">Ajuda a enxergar custo e venda por porção.</div>
                       </div>
                       <div className="form-group">
                         <label className="form-label">Horas de trabalho</label>
@@ -836,7 +835,7 @@ export default function CalculadoraPage() {
                       <div className="form-group">
                         <label className="form-label">Valor/hora</label>
                         <CurrencyInput value={laborRate} onChange={setLaborRate} />
-                        <div className="form-hint">Mao de obra: {formatCurrency(laborHours * laborRate)}</div>
+                        <div className="form-hint">Mão de obra: {formatCurrency(laborHours * laborRate)}</div>
                       </div>
                       <div className="form-group">
                         <label className="form-label">Custo fixo considerado</label>
@@ -847,7 +846,7 @@ export default function CalculadoraPage() {
 
                     <div className="form-row">
                       <div className="form-group">
-                        <label className="form-label">Meta de pedidos/mes</label>
+                        <label className="form-label">Meta de pedidos/mês</label>
                         <input
                           className="form-input"
                           type="number"
@@ -874,7 +873,7 @@ export default function CalculadoraPage() {
 
                 <div className="card">
                   <div className="card-header">
-                    <h3>Observacoes do modelo</h3>
+                    <h3>Observações do modelo</h3>
                   </div>
                   <div className="card-body">
                     <textarea
@@ -916,7 +915,7 @@ export default function CalculadoraPage() {
                           )}
                           {pricing.laborCost > 0 && (
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ color: 'var(--text-secondary)' }}>Mao de obra</span>
+                              <span style={{ color: 'var(--text-secondary)' }}>Mão de obra</span>
                               <span style={{ fontWeight: 600 }}>{formatCurrency(pricing.laborCost)}</span>
                             </div>
                           )}
@@ -971,23 +970,23 @@ export default function CalculadoraPage() {
 
                         <div style={{ background: 'var(--gray-50)', borderRadius: 'var(--radius-md)', padding: '12px 14px', marginBottom: 12, textAlign: 'center' }}>
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: 4 }}>
-                            Preco sugerido
+                            Preço sugerido
                           </div>
                           <div style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)' }}>
                             {formatCurrency(pricing.suggestedPrice)}
                           </div>
                         </div>
-
-                        <div className="form-group" style={{ marginBottom: 16 }}>
-                          <label className="form-label">Preco final</label>
-                          <CurrencyInput
-                            nullable
-                            value={manualPrice}
+<div className="form-group" style={{ marginBottom: 16 }}>
+  <label className="form-label">Preço final</label>
+  <CurrencyInput
+    nullable
+    value={manualPrice}
+...
                             onChange={setManualPrice}
                             placeholder={formatCurrencyInputDraft(pricing.suggestedPrice)}
                             style={{ fontSize: '1.125rem', fontWeight: 700, textAlign: 'center' }}
                           />
-                          <div className="form-hint">Se ficar vazio, o sistema usa o preco sugerido.</div>
+                          <div className="form-hint">Se ficar vazio, o sistema usa o preço sugerido.</div>
                         </div>
 
                         <div
@@ -1025,13 +1024,13 @@ export default function CalculadoraPage() {
                         {servingsTarget > 0 && (
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 10 }}>
                             <div className="card" style={{ padding: 14, boxShadow: 'none' }}>
-                              <div className="text-xs text-muted">Custo por porcao</div>
+                              <div className="text-xs text-muted">Custo por porção</div>
                               <div style={{ fontWeight: 800, marginTop: 4 }}>
                                 {formatCurrency(pricing.totalCost / servingsTarget)}
                               </div>
                             </div>
                             <div className="card" style={{ padding: 14, boxShadow: 'none' }}>
-                              <div className="text-xs text-muted">Venda por porcao</div>
+                              <div className="text-xs text-muted">Venda por porção</div>
                               <div style={{ fontWeight: 800, marginTop: 4 }}>
                                 {formatCurrency(pricing.salePrice / servingsTarget)}
                               </div>

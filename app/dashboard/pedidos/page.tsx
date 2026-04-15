@@ -75,8 +75,8 @@ interface OrderFormState {
 const statusOptions = [
   { value: 'pending', label: 'Pendente' },
   { value: 'confirmed', label: 'Confirmado' },
-  { value: 'in_progress', label: 'Em producao' },
-  { value: 'completed', label: 'Concluido' },
+  { value: 'in_progress', label: 'Em produção' },
+  { value: 'completed', label: 'Concluído' },
   { value: 'delivered', label: 'Entregue' },
   { value: 'cancelled', label: 'Cancelado' },
 ]
@@ -218,7 +218,7 @@ export default function PedidosPage() {
       setIngredients((ingredientsRes.data || []) as Ingredient[])
     } catch (error) {
       console.error('Erro ao carregar pedidos:', error)
-      showToast('error', 'Nao foi possivel carregar os pedidos.')
+      showToast('error', 'Não foi possível carregar os pedidos.')
     } finally {
       setLoading(false)
     }
@@ -342,7 +342,7 @@ export default function PedidosPage() {
   const handleSave = async () => {
     const title = form.title.trim()
     if (!title) {
-      setFormError('Informe o titulo do pedido.')
+      setFormError('Informe o título do pedido.')
       return
     }
 
@@ -357,12 +357,12 @@ export default function PedidosPage() {
     }
 
     if (form.delivery_date && form.event_date && form.delivery_date > form.event_date) {
-      setFormError('A data de entrega nao pode ser posterior a data do evento.')
+      setFormError('A data de entrega não pode ser posterior à data do evento.')
       return
     }
 
     if (form.deposit_amount > form.sale_price) {
-      setFormError('O valor de entrada nao pode ser maior que o valor total.')
+      setFormError('O valor de entrada não pode ser maior que o valor total.')
       return
     }
 
@@ -408,7 +408,7 @@ export default function PedidosPage() {
           const { error: taskError } = await supabase.from('production_tasks').insert(generatedTasks)
           if (taskError) {
             console.error('Erro ao criar tarefas automáticas:', taskError)
-            showToast('error', 'Pedido salvo, mas nao foi possivel gerar as tarefas automaticamente.')
+            showToast('error', 'Pedido salvo, mas não foi possível gerar as tarefas automaticamente.')
           }
         }
 
@@ -431,7 +431,7 @@ export default function PedidosPage() {
     try {
       const { error } = await supabase.from('orders').delete().eq('id', id)
       if (error) throw error
-      showToast('success', 'Pedido excluido!')
+      showToast('success', 'Pedido excluído!')
       load()
     } catch (error) {
       showToast('error', getErrorMessage(error, 'Erro ao excluir pedido'))
@@ -487,7 +487,7 @@ export default function PedidosPage() {
       <div className="page-header">
         <div>
           <h1>Pedidos</h1>
-          <p>Cliente + modelo + datas. O resto precisa ser rapido.</p>
+          <p>Cliente + modelo + datas. O resto precisa ser rápido.</p>
         </div>
         <button className="btn btn-primary" onClick={() => openNew()}>
           <Plus size={18} />
@@ -519,7 +519,7 @@ export default function PedidosPage() {
         <div className="stat-card">
           <div className="stat-icon"><ShoppingBag size={24} /></div>
           <div className="stat-value">{formatCurrency(Number.isFinite(averageTicket) ? averageTicket : 0)}</div>
-          <div className="stat-label">Ticket medio</div>
+          <div className="stat-label">Ticket médio</div>
         </div>
       </div>
 
@@ -527,7 +527,7 @@ export default function PedidosPage() {
         <div className="card" style={{ marginBottom: 20, borderColor: 'var(--warning-500)', background: 'var(--warning-50)' }}>
           <div className="card-body" style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center' }}>
             <div>
-              <div style={{ fontWeight: 800, marginBottom: 4 }}>Pre-requisitos para vender rapido</div>
+              <div style={{ fontWeight: 800, marginBottom: 4 }}>Pré-requisitos para vender rápido</div>
               <div className="text-sm text-muted">
                 Cadastre pelo menos um cliente e um modelo antes de criar pedidos.
               </div>
@@ -571,7 +571,7 @@ export default function PedidosPage() {
         </select>
         <select className="form-select" style={{ width: 180 }} value={timelineFilter} onChange={(event) => setTimelineFilter(event.target.value as 'all' | 'upcoming' | 'overdue')}>
           <option value="all">Qualquer prazo</option>
-          <option value="upcoming">Proximos</option>
+          <option value="upcoming">Próximos</option>
           <option value="overdue">Atrasados</option>
         </select>
       </div>
@@ -599,7 +599,7 @@ export default function PedidosPage() {
                 <th>Status</th>
                 <th>Pagamento</th>
                 <th style={{ textAlign: 'right' }}>Valor</th>
-                <th style={{ textAlign: 'right' }}>Acoes</th>
+                <th style={{ textAlign: 'right' }}>Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -633,7 +633,7 @@ export default function PedidosPage() {
                     <div className="table-actions" style={{ justifyContent: 'flex-end' }}>
                       {item.status !== 'delivered' && item.status !== 'cancelled' && (
                         <button className="btn btn-ghost btn-sm" onClick={() => handleAdvanceStatus(item)}>
-                          Avancar
+                          Avançar
                         </button>
                       )}
                       <button className="btn btn-ghost btn-icon" onClick={() => openEdit(item)}>
@@ -703,7 +703,7 @@ export default function PedidosPage() {
                         </div>
                       </div>
                       <div style={{ textAlign: 'right' }}>
-                        <div className="text-xs text-muted">Preco sugerido</div>
+                        <div className="text-xs text-muted">Preço sugerido</div>
                         <div style={{ fontWeight: 800, color: 'var(--brand-600)' }}>
                           {formatCurrency(presetDraft.sale_price)}
                         </div>
@@ -714,12 +714,12 @@ export default function PedidosPage() {
               )}
 
               <div className="form-group">
-                <label className="form-label">Titulo do pedido</label>
+                <label className="form-label">Título do pedido</label>
                 <input
                   className="form-input"
                   value={form.title}
                   onChange={(event) => setForm((current) => ({ ...current, title: event.target.value }))}
-                  placeholder="Ex: Bolo de aniversario da Ana"
+                  placeholder="Ex: Bolo de aniversário da Ana"
                 />
               </div>
 
@@ -764,7 +764,7 @@ export default function PedidosPage() {
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Porcoes</label>
+                  <label className="form-label">Porções</label>
                   <input
                     className="form-input"
                     type="number"
@@ -838,13 +838,13 @@ export default function PedidosPage() {
                     onChange={(event) => setForm((current) => ({ ...current, auto_generate_tasks: event.target.checked }))}
                   />
                   <span className="text-sm">
-                    Gerar tarefas de producao automaticamente a partir do modelo
+                    Gerar tarefas de produção automaticamente a partir do modelo
                   </span>
                 </label>
               )}
 
               <div className="form-group" style={{ marginBottom: 0 }}>
-                <label className="form-label">Observacoes</label>
+                <label className="form-label">Observações</label>
                 <textarea
                   className="form-textarea"
                   value={form.notes}

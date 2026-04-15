@@ -297,7 +297,7 @@ export default function ReceitasPage() {
                     <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span className="text-xs text-muted">Use esta receita para montar o modelo de venda</span>
                       <Link href={`/dashboard/calculadora?recipe=${recipe.id}`} className="btn btn-secondary btn-sm" onClick={(event) => event.stopPropagation()}>
-                        Calcular preco
+                        Calcular preço
                       </Link>
                     </div>
                 </div>

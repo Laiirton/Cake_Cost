@@ -72,13 +72,13 @@ interface DashboardState {
 const statusLabels: Record<string, string> = {
   pending: 'Pendente',
   confirmed: 'Confirmado',
-  in_progress: 'Em producao',
-  completed: 'Concluido',
+  in_progress: 'Em produção',
+  completed: 'Concluído',
   delivered: 'Entregue',
   cancelled: 'Cancelado',
   todo: 'A fazer',
   doing: 'Em andamento',
-  done: 'Concluido',
+  done: 'Concluído',
   partial: 'Parcial',
   paid: 'Pago',
 }
@@ -293,7 +293,7 @@ export default function DashboardPage() {
         <div className="stat-card">
           <div className="stat-icon"><TrendingUp size={24} /></div>
           <div className="stat-value">{formatCurrency(data.monthSales)}</div>
-          <div className="stat-label">Vendas do mes</div>
+          <div className="stat-label">Vendas do mês</div>
         </div>
         <div className="stat-card">
           <div className="stat-icon"><DollarSign size={24} /></div>
@@ -360,7 +360,7 @@ export default function DashboardPage() {
             <ArrowRight size={16} />
           </div>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>Criar novo pedido</div>
-          <div className="text-sm text-muted">Comece por cliente e modelo para preencher o pedido com menos digitacao.</div>
+          <div className="text-sm text-muted">Comece por cliente e modelo para preencher o pedido com menos digitação.</div>
         </Link>
         <Link href="/dashboard/calculadora" className="card" style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -368,15 +368,15 @@ export default function DashboardPage() {
             <ArrowRight size={16} />
           </div>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>Criar ou revisar modelo</div>
-          <div className="text-sm text-muted">Centralize precificacao, embalagem, entrega e extras antes de vender.</div>
+          <div className="text-sm text-muted">Centralize precificação, embalagem, entrega e extras antes de vender.</div>
         </Link>
         <Link href="/dashboard/producao" className="card" style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <Clock size={20} />
             <ArrowRight size={16} />
           </div>
-          <div style={{ fontWeight: 800, marginBottom: 6 }}>Ver producao</div>
-          <div className="text-sm text-muted">Acompanhe atrasos, itens de hoje e gargalos por estacao.</div>
+          <div style={{ fontWeight: 800, marginBottom: 6 }}>Ver produção</div>
+          <div className="text-sm text-muted">Acompanhe atrasos, itens de hoje e gargalos por estação.</div>
         </Link>
         <Link href="/dashboard/financeiro" className="card" style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -384,7 +384,7 @@ export default function DashboardPage() {
             <ArrowRight size={16} />
           </div>
           <div style={{ fontWeight: 800, marginBottom: 6 }}>Cobrar e registrar</div>
-          <div className="text-sm text-muted">Separe o que foi vendido do que entrou no caixa para nao se perder.</div>
+          <div className="text-sm text-muted">Separe o que foi vendido do que entrou no caixa para não se perder.</div>
         </Link>
       </div>
 
@@ -394,7 +394,7 @@ export default function DashboardPage() {
             <div className="card-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <AlertCircle size={18} style={{ color: 'var(--warning-500)' }} />
-                Pedidos que pedem acao
+                Pedidos que pedem ação
               </h3>
               <Link href="/dashboard/pedidos" className="btn btn-ghost btn-sm">
                 Ver pedidos
@@ -452,7 +452,7 @@ export default function DashboardPage() {
             <div className="card-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <DollarSign size={18} />
-                Cobrancas pendentes
+                Cobranças pendentes
               </h3>
               <Link href="/dashboard/financeiro" className="btn btn-ghost btn-sm">
                 Abrir financeiro
@@ -462,7 +462,7 @@ export default function DashboardPage() {
             <div className="card-body" style={{ padding: 0 }}>
               {data.pendingPayments.length === 0 ? (
                 <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
-                  Sem cobrancas pendentes por enquanto.
+                  Sem cobranças pendentes por enquanto.
                 </div>
               ) : (
                 <div style={{ padding: '6px 0' }}>
@@ -505,10 +505,10 @@ export default function DashboardPage() {
             <div className="card-header">
               <h3 style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Clock size={18} />
-                Producao em fila
+                Produção em fila
               </h3>
               <Link href="/dashboard/producao" className="btn btn-ghost btn-sm">
-                Ver producao
+                Ver produção
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -536,7 +536,7 @@ export default function DashboardPage() {
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div className="font-semibold text-sm">{task.title}</div>
                         <div className="text-xs text-muted">
-                          {task.orders?.title || 'Sem pedido'} • {task.station || 'Sem estacao'} • {formatDateTime(task.due_at)}
+                          {task.orders?.title || 'Sem pedido'} • {task.station || 'Sem estação'} • {formatDateTime(task.due_at)}
                         </div>
                       </div>
                     </div>
@@ -588,13 +588,13 @@ export default function DashboardPage() {
               >
                 <div style={{ fontWeight: 800, marginBottom: 6 }}>
                   {data.staleIngredients.length > 0
-                    ? `${data.staleIngredients.length} ingrediente(s) com preco antigo`
+                    ? `${data.staleIngredients.length} ingrediente(s) com preço antigo`
                     : 'Custos base atualizados'}
                 </div>
                 <div className="text-sm text-muted">
                   {data.staleIngredients.length > 0
                     ? data.staleIngredients.map((ingredient) => ingredient.name).join(', ')
-                    : 'A calculadora e os modelos vao refletir melhor o custo atual.'}
+                    : 'A calculadora e os modelos vão refletir melhor o custo atual.'}
                 </div>
               </div>
             </div>

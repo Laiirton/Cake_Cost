@@ -139,7 +139,7 @@ export default function FinanceiroPage() {
       )
     } catch (error) {
       console.error('Erro ao carregar financeiro:', error)
-      showToast('error', 'Nao foi possivel carregar o financeiro.')
+      showToast('error', 'Não foi possível carregar o financeiro.')
     } finally {
       setLoading(false)
     }
@@ -213,7 +213,7 @@ export default function FinanceiroPage() {
 
   const handleSave = async () => {
     if (!(form.description as string)?.trim()) {
-      setFormError('Informe a descricao do lancamento.')
+      setFormError('Informe a descrição do lançamento.')
       return
     }
 
@@ -224,16 +224,16 @@ export default function FinanceiroPage() {
       if (editing) {
         const { error } = await supabase.from('cash_entries').update(form).eq('id', editing.id)
         if (error) throw error
-        showToast('success', 'Lancamento atualizado!')
+        showToast('success', 'Lançamento atualizado!')
       } else {
         const { error } = await supabase.from('cash_entries').insert({ ...form, id: crypto.randomUUID() })
         if (error) throw error
-        showToast('success', 'Lancamento criado!')
+        showToast('success', 'Lançamento criado!')
       }
       closeModal()
       load()
     } catch (error) {
-      const message = getErrorMessage(error, 'Erro ao salvar lancamento')
+      const message = getErrorMessage(error, 'Erro ao salvar lançamento')
       setFormError(message)
       showToast('error', message)
     } finally {
@@ -242,14 +242,14 @@ export default function FinanceiroPage() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Excluir lancamento?')) return
+    if (!confirm('Excluir lançamento?')) return
     try {
       const { error } = await supabase.from('cash_entries').delete().eq('id', id)
       if (error) throw error
-      showToast('success', 'Lancamento excluido!')
+      showToast('success', 'Lançamento excluído!')
       load()
     } catch (error) {
-      showToast('error', getErrorMessage(error, 'Erro ao excluir lancamento'))
+      showToast('error', getErrorMessage(error, 'Erro ao excluir lançamento'))
     }
   }
 
@@ -292,11 +292,11 @@ export default function FinanceiroPage() {
       <div className="page-header">
         <div>
           <h1>Financeiro</h1>
-          <p>Pedidos e caixa manual ficam separados para nao misturar saldo a receber com movimentacao avulsa.</p>
+          <p>Pedidos e caixa manual ficam separados para não misturar saldo a receber com movimentação avulsa.</p>
         </div>
         <button className="btn btn-primary" onClick={openNew}>
           <Plus size={18} />
-          Novo lancamento
+          Novo lançamento
         </button>
       </div>
 
@@ -309,7 +309,7 @@ export default function FinanceiroPage() {
                 Pedidos mostram o valor vendido e o que ainda falta cobrar. Caixa manual mostra receitas e despesas avulsas, sem alterar o a receber.
               </div>
               <div className="text-xs text-muted" style={{ marginTop: 6 }}>
-                Periodo em foco: {periodLabel}
+                Período em foco: {periodLabel}
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -367,7 +367,7 @@ export default function FinanceiroPage() {
               <div>
                 <div style={{ fontWeight: 800, marginBottom: 4 }}>Pedidos</div>
                 <div className="text-sm text-muted">
-                  Visao comercial dos pedidos. Nao mistura os lancamentos manuais.
+                  Visão comercial dos pedidos. Não mistura os lançamentos manuais.
                 </div>
               </div>
               <span className="badge badge-info">{pendingOrders.length} em aberto</span>
@@ -399,10 +399,10 @@ export default function FinanceiroPage() {
               <div>
                 <div style={{ fontWeight: 800, marginBottom: 4 }}>Caixa manual</div>
                 <div className="text-sm text-muted">
-                  Receitas e despesas lancadas manualmente. Esse saldo nao altera o a receber dos pedidos.
+                  Receitas e despesas lançadas manualmente. Esse saldo não altera o a receber dos pedidos.
                 </div>
               </div>
-              <span className="badge badge-neutral">{filtered.length} lancamentos</span>
+              <span className="badge badge-neutral">{filtered.length} lançamentos</span>
             </div>
             <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
               <div className="stat-card">
@@ -437,7 +437,7 @@ export default function FinanceiroPage() {
       <div className="grid-2" style={{ alignItems: 'start' }}>
         <div className="card">
           <div className="card-header">
-            <h3>Cobrancas em aberto</h3>
+            <h3>Cobranças em aberto</h3>
             <span className="badge badge-warning">{pendingOrders.length}</span>
           </div>
           <div className="card-body" style={{ padding: 0 }}>
@@ -483,7 +483,7 @@ export default function FinanceiroPage() {
 
         <div className="card">
           <div className="card-header">
-            <h3>Lancamentos manuais</h3>
+            <h3>Lançamentos manuais</h3>
             <span className="badge badge-neutral">{filtered.length}</span>
           </div>
           <div className="card-body">
@@ -503,7 +503,7 @@ export default function FinanceiroPage() {
 
             {filtered.length === 0 ? (
               <div style={{ textAlign: 'center', color: 'var(--text-tertiary)', fontSize: '0.875rem' }}>
-                Nenhum lancamento manual nessa visao.
+                Nenhum lançamento manual nessa visão.
               </div>
             ) : (
               <div className="table-container">
@@ -512,10 +512,10 @@ export default function FinanceiroPage() {
                     <tr>
                       <th>Tipo</th>
                       <th>Categoria</th>
-                      <th>Descricao</th>
+                      <th>Descrição</th>
                       <th>Data</th>
                       <th style={{ textAlign: 'right' }}>Valor</th>
-                      <th style={{ textAlign: 'right' }}>Acoes</th>
+                      <th style={{ textAlign: 'right' }}>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -555,7 +555,7 @@ export default function FinanceiroPage() {
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal" onClick={(event) => event.stopPropagation()}>
             <div className="modal-header">
-              <h2>{editing ? 'Editar lancamento' : 'Novo lancamento'}</h2>
+              <h2>{editing ? 'Editar lançamento' : 'Novo lançamento'}</h2>
               <button className="btn btn-ghost btn-icon" onClick={closeModal}>
                 <X size={20} />
               </button>
@@ -577,7 +577,7 @@ export default function FinanceiroPage() {
                 </div>
               </div>
               <div className="form-group">
-                <label className="form-label">Descricao</label>
+                <label className="form-label">Descrição</label>
                 <input className="form-input" value={(form.description as string) || ''} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} />
               </div>
               <div className="form-row">
@@ -593,7 +593,7 @@ export default function FinanceiroPage() {
               <div className="form-group" style={{ marginBottom: 0 }}>
                 <label className="form-label">Vincular a pedido (opcional)</label>
                 <select className="form-select" value={(form.order_id as string) || ''} onChange={(event) => setForm((current) => ({ ...current, order_id: event.target.value || null }))}>
-                  <option value="">Nao vincular</option>
+                  <option value="">Não vincular</option>
                   {orders.map((order) => (
                     <option key={order.id} value={order.id}>{order.title}</option>
                   ))}
@@ -603,7 +603,7 @@ export default function FinanceiroPage() {
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={closeModal}>Cancelar</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-                {saving ? 'Salvando...' : editing ? 'Atualizar lancamento' : 'Criar lancamento'}
+                {saving ? 'Salvando...' : editing ? 'Atualizar lançamento' : 'Criar lançamento'}
               </button>
             </div>
           </div>
