@@ -31,10 +31,66 @@ interface OrderSummary {
   customers?: { name: string }
 }
 
+type PeriodMode = 'all' | 'month' | 'custom'
+
+type DateRange = {
+  start: string
+  end: string
+}
+
 const kindOptions = [
   { value: 'income', label: 'Receita' },
   { value: 'expense', label: 'Despesa' },
 ]
+
+function toLocalDateInputValue(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+function getCurrentMonthValue(): string {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  return `${year}-${month}`
+}
+
+function getMonthBounds(monthValue: string): DateRange | null {
+  const [yearString, monthString] = monthValue.split('-')
+  const year = Number(yearString)
+  const month = Number(monthString)
+
+  if (!year || !month) return null
+
+  const start = toLocalDateInputValue(new Date(year, month - 1, 1))
+  const end = toLocalDateInputValue(new Date(year, month, 0))
+  return { start, end }
+}
+
+function normalizeDateRange(start: string, end: string): DateRange | null {
+  if (!start || !end) return null
+
+  if (start <= end) {
+    return { start, end }
+  }
+
+  return { start: end, end: start }
+}
+
+function formatMonthYearLabel(monthValue: string): string {
+  const [yearString, monthString] = monthValue.split('-')
+  const year = Number(yearString)
+  const month = Number(monthString)
+
+  if (!year || !month) return monthValue
+
+  return new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(year, month - 1, 1))
+}
 
 export default function FinanceiroPage() {
   const [items, setItems] = useState<CashEntry[]>([])
@@ -47,7 +103,16 @@ export default function FinanceiroPage() {
   const [form, setForm] = useState<Record<string, unknown>>({})
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: string; message: string } | null>(null)
-  const [period, setPeriod] = useState<'all' | 'month'>('all')
+  const [periodMode, setPeriodMode] = useState<PeriodMode>('all')
+  const [selectedMonth, setSelectedMonth] = useState(() => getCurrentMonthValue())
+  const [customStart, setCustomStart] = useState(() => {
+    const now = new Date()
+    return toLocalDateInputValue(new Date(now.getFullYear(), now.getMonth(), 1))
+  })
+  const [customEnd, setCustomEnd] = useState(() => {
+    const now = new Date()
+    return toLocalDateInputValue(new Date(now.getFullYear(), now.getMonth() + 1, 0))
+  })
   const [formError, setFormError] = useState('')
   const supabase = useMemo(() => createClient(), [])
 
@@ -84,30 +149,32 @@ export default function FinanceiroPage() {
     load()
   }, [load])
 
-  const currentMonthLabel = new Intl.DateTimeFormat('pt-BR', {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date())
-
-  const monthBounds = useMemo(() => {
-    const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-    return { start, end }
-  }, [])
+  const selectedMonthBounds = useMemo(() => getMonthBounds(selectedMonth), [selectedMonth])
+  const customPeriodBounds = useMemo(() => normalizeDateRange(customStart, customEnd), [customEnd, customStart])
+  const activePeriodBounds = useMemo(() => {
+    if (periodMode === 'all') return null
+    if (periodMode === 'month') return selectedMonthBounds
+    return customPeriodBounds
+  }, [customPeriodBounds, periodMode, selectedMonthBounds])
+  const periodLabel = useMemo(() => {
+    if (periodMode === 'all') return 'Todos os registros'
+    if (periodMode === 'month') return selectedMonthBounds ? formatMonthYearLabel(selectedMonth) : 'Mês selecionado'
+    if (!customPeriodBounds) return 'Período customizado'
+    return `De ${formatDate(customPeriodBounds.start)} até ${formatDate(customPeriodBounds.end)}`
+  }, [customPeriodBounds, periodMode, selectedMonth, selectedMonthBounds])
 
   const scopedItems = useMemo(() => {
-    if (period === 'all') return items
-    return items.filter((item) => item.occurred_on >= monthBounds.start && item.occurred_on <= monthBounds.end)
-  }, [items, monthBounds.end, monthBounds.start, period])
+    if (!activePeriodBounds) return items
+    return items.filter((item) => item.occurred_on >= activePeriodBounds.start && item.occurred_on <= activePeriodBounds.end)
+  }, [activePeriodBounds, items])
 
   const scopedOrders = useMemo(() => {
-    if (period === 'all') return orders
+    if (!activePeriodBounds) return orders
     return orders.filter((order) => {
       const timeline = getOrderTimelineDate(order)
-      return timeline >= monthBounds.start && timeline <= monthBounds.end
+      return timeline >= activePeriodBounds.start && timeline <= activePeriodBounds.end
     })
-  }, [orders, monthBounds.end, monthBounds.start, period])
+  }, [activePeriodBounds, orders])
 
   const openNew = () => {
     setEditing(null)
@@ -242,18 +309,58 @@ export default function FinanceiroPage() {
                 Pedidos mostram o valor vendido e o que ainda falta cobrar. Caixa manual mostra receitas e despesas avulsas, sem alterar o a receber.
               </div>
               <div className="text-xs text-muted" style={{ marginTop: 6 }}>
-                Periodo em foco: {period === 'all' ? 'Todos os registros' : currentMonthLabel}
+                Periodo em foco: {periodLabel}
               </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className={`btn btn-sm ${period === 'all' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPeriod('all')}>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className={`btn btn-sm ${periodMode === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPeriodMode('all')}
+              >
                 Tudo
               </button>
-              <button className={`btn btn-sm ${period === 'month' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setPeriod('month')}>
-                Este mes
+              <button
+                type="button"
+                className={`btn btn-sm ${periodMode === 'month' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPeriodMode('month')}
+              >
+                Mês/Ano
+              </button>
+              <button
+                type="button"
+                className={`btn btn-sm ${periodMode === 'custom' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setPeriodMode('custom')}
+              >
+                Período customizado
               </button>
             </div>
           </div>
+
+          {periodMode === 'month' && (
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'end' }}>
+              <div className="form-group" style={{ marginBottom: 0, minWidth: 220 }}>
+                <label className="form-label">Mês de fechamento</label>
+                <input className="form-input" type="month" value={selectedMonth} onChange={(event) => setSelectedMonth(event.target.value)} />
+              </div>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setSelectedMonth(getCurrentMonthValue())}>
+                Mês atual
+              </button>
+            </div>
+          )}
+
+          {periodMode === 'custom' && (
+            <div className="form-row" style={{ marginTop: 2 }}>
+              <div className="form-group">
+                <label className="form-label">De</label>
+                <input className="form-input" type="date" value={customStart} onChange={(event) => setCustomStart(event.target.value)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Até</label>
+                <input className="form-input" type="date" value={customEnd} onChange={(event) => setCustomEnd(event.target.value)} />
+              </div>
+            </div>
+          )}
 
           <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: 4 }}>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'space-between', flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
