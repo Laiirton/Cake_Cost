@@ -7,8 +7,10 @@ import {
   formatCurrency, calculateItemCost, calculatePricing,
   RECIPE_SECTIONS, uid,
   type Ingredient, type RecipeItem, type PricingBreakdown,
+  formatCurrencyInputDraft,
   getErrorMessage,
 } from '@/lib/utils'
+import CurrencyInput from '@/app/dashboard/components/CurrencyInput'
 
 interface Recipe {
   id: string; name: string; category: string; size_label: string; yield_label: string; items: RecipeItem[]
@@ -323,7 +325,7 @@ export default function CalculadoraPage() {
                     {extraItems.map(extra => (
                       <div key={extra.uid} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                         <input className="form-input" placeholder="Ex: Topper" value={extra.name} onChange={e => updateExtra(extra.uid, 'name', e.target.value)} style={{ flex: 1, padding: '8px 10px', fontSize: '0.8125rem' }} />
-                        <input className="form-input" type="number" step="0.01" min="0" value={extra.cost || ''} onChange={e => updateExtra(extra.uid, 'cost', parseFloat(e.target.value) || 0)} style={{ width: 110, textAlign: 'right', padding: '8px 10px', fontSize: '0.8125rem' }} placeholder="R$ 0,00" />
+                        <CurrencyInput value={extra.cost} onChange={val => updateExtra(extra.uid, 'cost', val)} placeholder="0,00" containerStyle={{ width: 160, flex: '0 0 160px' }} style={{ padding: '8px 10px', fontSize: '0.8125rem' }} />
                         <button className="btn btn-ghost btn-icon btn-sm" onClick={() => removeExtra(extra.uid)} style={{ color: 'var(--danger-500)' }}><Trash2 size={14} /></button>
                       </div>
                     ))}
@@ -345,14 +347,14 @@ export default function CalculadoraPage() {
                   </div>
                   <div className="form-group">
                     <label className="form-label">Valor/Hora (R$)</label>
-                    <input className="form-input" type="number" step="0.01" min="0" value={laborRate || ''} onChange={e => setLaborRate(parseFloat(e.target.value) || 0)} />
+                    <CurrencyInput value={laborRate} onChange={setLaborRate} />
                     <div className="form-hint">Mão de obra: {formatCurrency(laborHours * laborRate)}</div>
                   </div>
                 </div>
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Custo Fixo Mensal (R$)</label>
-                    <input className="form-input" type="number" step="0.01" min="0" value={fixedCost || ''} onChange={e => setFixedCost(parseFloat(e.target.value) || 0)} />
+                    <CurrencyInput value={fixedCost} onChange={setFixedCost} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Meta Pedidos/Mês</label>
@@ -363,11 +365,11 @@ export default function CalculadoraPage() {
                 <div className="form-row">
                   <div className="form-group">
                     <label className="form-label">Embalagem (R$)</label>
-                    <input className="form-input" type="number" step="0.01" min="0" value={packagingCost || ''} onChange={e => setPackagingCost(parseFloat(e.target.value) || 0)} />
+                    <CurrencyInput value={packagingCost} onChange={setPackagingCost} />
                   </div>
                   <div className="form-group">
                     <label className="form-label">Entrega (R$)</label>
-                    <input className="form-input" type="number" step="0.01" min="0" value={deliveryCost || ''} onChange={e => setDeliveryCost(parseFloat(e.target.value) || 0)} />
+                    <CurrencyInput value={deliveryCost} onChange={setDeliveryCost} />
                   </div>
                 </div>
               </div>
@@ -464,18 +466,12 @@ export default function CalculadoraPage() {
                     {/* Manual Sale Price */}
                     <div className="form-group" style={{ marginBottom: 16 }}>
                       <label className="form-label">Preço de Venda Final (R$)</label>
-                      <input
-                        className="form-input"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        value={manualPrice !== null ? manualPrice : ''}
-                        onChange={e => {
-                          const v = e.target.value
-                          setManualPrice(v ? parseFloat(v) : null)
-                        }}
-                        placeholder={pricing.suggestedPrice.toFixed(2)}
-                        style={{ fontSize: '1.125rem', textAlign: 'center', fontWeight: 700 }}
+                      <CurrencyInput
+                        nullable
+                        value={manualPrice}
+                        onChange={setManualPrice}
+                        placeholder={formatCurrencyInputDraft(pricing.suggestedPrice)}
+                        style={{ fontSize: '1.125rem', fontWeight: 700, textAlign: 'center' }}
                       />
                       <div className="form-hint">Deixe vazio para usar o preço sugerido</div>
                     </div>

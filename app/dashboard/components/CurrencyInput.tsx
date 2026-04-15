@@ -1,68 +1,126 @@
 'use client'
 
-import React, { useEffect, useRef } from 'react'
-import { parseCurrencyInput } from '@/lib/utils'
+import React, { useState } from 'react'
+import {
+  formatCurrencyInputDisplay,
+  formatCurrencyInputDraft,
+  parseCurrencyInput,
+} from '@/lib/utils'
 
-interface CurrencyInputProps {
+type CurrencyInputBaseProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  'value' | 'defaultValue' | 'onChange' | 'type'
+>
+
+type CurrencyInputNonNullableProps = CurrencyInputBaseProps & {
+  nullable?: false
   value: number
   onChange: (value: number) => void
-  placeholder?: string
-  className?: string
+  containerClassName?: string
+  containerStyle?: React.CSSProperties
 }
 
-function formatDisplayValue(value: number) {
-  if (!Number.isFinite(value) || value === 0) {
+type CurrencyInputNullableProps = CurrencyInputBaseProps & {
+  nullable: true
+  value: number | null
+  onChange: (value: number | null) => void
+  containerClassName?: string
+  containerStyle?: React.CSSProperties
+}
+
+type CurrencyInputProps = CurrencyInputNonNullableProps | CurrencyInputNullableProps
+
+function formatEditableValue(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
     return ''
   }
 
-  return new Intl.NumberFormat('pt-BR', {
-    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
-    maximumFractionDigits: 2,
-  }).format(value)
+  return formatCurrencyInputDraft(value)
 }
 
-export default function CurrencyInput({
-  value,
-  onChange,
-  placeholder = '0,00',
-  className = '',
-}: CurrencyInputProps) {
-  const inputRef = useRef<HTMLInputElement>(null)
+function formatCommittedValue(value: number | null) {
+  if (value === null || !Number.isFinite(value)) {
+    return ''
+  }
 
-  useEffect(() => {
-    const input = inputRef.current
-    if (!input || document.activeElement === input) {
+  return formatCurrencyInputDisplay(value)
+}
+
+export default function CurrencyInput(props: CurrencyInputProps) {
+  const {
+    value,
+    onChange,
+    placeholder = '0,00',
+    className = '',
+    containerClassName = '',
+    containerStyle,
+    onFocus: userOnFocus,
+    onBlur: userOnBlur,
+    autoComplete = 'off',
+    spellCheck = false,
+    nullable,
+    ...inputProps
+  } = props
+
+  const [isFocused, setIsFocused] = useState(false)
+  const [draftValue, setDraftValue] = useState<string | null>(null)
+  const isNullable = nullable === true
+
+  const displayValue = isFocused
+    ? draftValue ?? formatEditableValue(value)
+    : formatCommittedValue(value)
+
+  const emitValue = (rawValue: string) => {
+    if (isNullable && rawValue.trim() === '') {
+      (onChange as (nextValue: number | null) => void)(null)
       return
     }
 
-    input.value = formatDisplayValue(value)
-  }, [value])
+    const nextValue = parseCurrencyInput(rawValue)
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(parseCurrencyInput(e.target.value))
+    if (isNullable) {
+      (onChange as (nextValue: number | null) => void)(nextValue)
+      return
+    }
+
+    (onChange as (nextValue: number) => void)(nextValue)
   }
 
-  const handleBlur = () => {
-    const input = inputRef.current
-    if (!input) return
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(true)
+    setDraftValue(formatEditableValue(value))
+    userOnFocus?.(event)
+  }
 
-    input.value = formatDisplayValue(value)
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value
+    setDraftValue(rawValue)
+    emitValue(rawValue)
+  }
+
+  const handleBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    setIsFocused(false)
+    const rawValue = draftValue ?? event.target.value
+    setDraftValue(null)
+    emitValue(rawValue)
+    userOnBlur?.(event)
   }
 
   return (
-    <div className="currency-field">
+    <div className={`currency-field ${containerClassName}`.trim()} style={containerStyle}>
       <span className="currency-field-prefix">R$</span>
       <input
-        ref={inputRef}
+        {...inputProps}
         className={`form-input currency-field-input ${className}`.trim()}
         type="text"
         inputMode="decimal"
-        defaultValue={formatDisplayValue(value)}
+        value={displayValue}
         onChange={handleChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
-        autoComplete="off"
-        spellCheck={false}
+        autoComplete={autoComplete}
+        spellCheck={spellCheck}
       />
     </div>
   )

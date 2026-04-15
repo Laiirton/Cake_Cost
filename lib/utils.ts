@@ -133,6 +133,32 @@ export function formatCurrencyInput(value: number | string): string {
   }).format(num)
 }
 
+const currencyInputDisplayFormatter = new Intl.NumberFormat('pt-BR', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+})
+
+const currencyInputDraftFormatter = new Intl.NumberFormat('pt-BR', {
+  useGrouping: false,
+  maximumFractionDigits: 20,
+})
+
+/**
+ * Format a number for a BRL input when it is not being edited.
+ */
+export function formatCurrencyInputDisplay(value: number): string {
+  if (!Number.isFinite(value)) return ''
+  return currencyInputDisplayFormatter.format(value)
+}
+
+/**
+ * Format a number for editable BRL input text while the field is focused.
+ */
+export function formatCurrencyInputDraft(value: number): string {
+  if (!Number.isFinite(value)) return ''
+  return currencyInputDraftFormatter.format(value)
+}
+
 /**
  * Parse currency string to number (removes formatting)
  */
