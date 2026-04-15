@@ -213,6 +213,11 @@ export default function FinanceiroPage() {
       return
     }
 
+    if (!form.occurred_on) {
+      setFormError('Informe a data do lançamento.')
+      return
+    }
+
     setSaving(true)
     setFormError('')
 

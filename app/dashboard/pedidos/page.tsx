@@ -358,6 +358,16 @@ export default function PedidosPage() {
       return
     }
 
+    if (!form.event_date) {
+      setFormError('Informe a data do evento.')
+      return
+    }
+
+    if (!form.delivery_date) {
+      setFormError('Informe a data de entrega.')
+      return
+    }
+
     if (form.deposit_amount > form.sale_price) {
       setFormError('O valor de entrada não pode ser maior que o valor total.')
       return
