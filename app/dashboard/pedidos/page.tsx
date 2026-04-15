@@ -170,7 +170,7 @@ export default function PedidosPage() {
                     />
                   </div>
                   <div className="form-group">
-                    <label className="form-label">Sinal (R$)</label>
+                    <label className="form-label">Valor de Entrada (R$)</label>
                     <CurrencyInput 
                       value={(form.deposit_amount as number) || 0} 
                       onChange={val => setForm({ ...form, deposit_amount: val })} 
