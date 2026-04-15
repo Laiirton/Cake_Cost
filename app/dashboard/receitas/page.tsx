@@ -9,6 +9,7 @@ import {
   formatCurrency, calculateItemCost, calculateSectionCost, calculateRecipeTotalCost,
   RECIPE_SECTIONS, uid,
   type Ingredient, type RecipeItem,
+  getErrorMessage,
 } from '@/lib/utils'
 
 interface Recipe {
@@ -31,6 +32,7 @@ export default function ReceitasPage() {
   const [editing, setEditing] = useState<Recipe | null>(null)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: string; message: string } | null>(null)
+  const [formError, setFormError] = useState('')
 
   // Form state
   const [formName, setFormName] = useState('')
@@ -83,6 +85,7 @@ export default function ReceitasPage() {
     setEditing(null)
     setFormName(''); setFormCategory(''); setFormSize(''); setFormYield(''); setFormNotes('')
     setFormItems([])
+    setFormError('')
     setExpandedSections(new Set(RECIPE_SECTIONS.map(s => s.key)))
     setShowEditor(true)
   }
@@ -95,13 +98,25 @@ export default function ReceitasPage() {
     setFormYield(recipe.yield_label)
     setFormNotes(recipe.notes)
     setFormItems(recipe.items.map(i => ({ ...i, uid: i.uid || uid() })))
+    setFormError('')
     setExpandedSections(new Set(RECIPE_SECTIONS.map(s => s.key)))
     setShowEditor(true)
   }
 
   const handleSave = async () => {
-    if (!formName.trim()) return
+    if (!formName.trim()) {
+      setFormError('Informe o nome da receita.')
+      return
+    }
+
+    const validItems = formItems.filter(item => item.ingredient_id && item.quantity > 0)
+    if (validItems.length === 0) {
+      setFormError('Adicione pelo menos um ingrediente com quantidade maior que zero.')
+      return
+    }
+
     setSaving(true)
+    setFormError('')
     try {
       const payload = {
         name: formName,
@@ -109,7 +124,7 @@ export default function ReceitasPage() {
         size_label: formSize,
         yield_label: formYield,
         notes: formNotes,
-        items: formItems,
+        items: validItems,
       }
       if (editing) {
         const { error } = await supabase.from('recipes').update(payload).eq('id', editing.id)
@@ -122,9 +137,11 @@ export default function ReceitasPage() {
       }
       setShowEditor(false)
       load()
-    } catch (err) {
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Erro ao salvar receita')
       console.error(err)
-      showToast('error', 'Erro ao salvar receita')
+      setFormError(message)
+      showToast('error', message)
     } finally {
       setSaving(false)
     }
@@ -299,6 +316,12 @@ export default function ReceitasPage() {
             </div>
 
             <div className="modal-body" style={{ maxHeight: 'calc(95vh - 140px)', overflowY: 'auto' }}>
+              {formError && (
+                <div className="form-error" style={{ marginBottom: 16 }}>
+                  {formError}
+                </div>
+              )}
+
               {/* Basic Info */}
               <div className="form-group">
                 <label className="form-label">Nome da Receita *</label>

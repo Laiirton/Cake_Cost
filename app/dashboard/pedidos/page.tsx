@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Search, Pencil, Trash2, X, ShoppingBag } from 'lucide-react'
-import { formatCurrency, formatDate, parseCurrencyInput, formatCurrencyInput } from '@/lib/utils'
+import { formatCurrency, formatDate, getErrorMessage } from '@/lib/utils'
 import CurrencyInput from '@/app/dashboard/components/CurrencyInput'
 
 interface Order {
@@ -40,6 +40,7 @@ export default function PedidosPage() {
   const [form, setForm] = useState<Record<string, unknown>>({})
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: string; message: string } | null>(null)
+  const [formError, setFormError] = useState('')
   const supabase = useMemo(() => createClient(), [])
 
   const load = useCallback(async () => {
@@ -59,18 +60,60 @@ export default function PedidosPage() {
   const showToast = (type: string, message: string) => { setToast({ type, message }); setTimeout(() => setToast(null), 3000) }
 
   const emptyForm = () => ({
-    customer_id: customers[0]?.id || '', preset_id: presets[0]?.id || '', title: '', theme: '', event_date: '', delivery_date: '', size_label: '', servings: 0, sale_price: 0, deposit_amount: 0, status: 'pending', payment_status: 'pending', notes: '', custom_adjustments: [], display_order: 0
+    customer_id: customers[0]?.id || '',
+    preset_id: presets[0]?.id || '',
+    title: '',
+    theme: '',
+    event_date: '',
+    delivery_date: '',
+    size_label: '',
+    servings: 0,
+    sale_price: 0,
+    deposit_amount: 0,
+    status: 'pending',
+    payment_status: 'pending',
+    notes: '',
+    custom_adjustments: [],
+    display_order: 0,
   })
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); setShowModal(true) }
+  const openNew = () => {
+    if (customers.length === 0 || presets.length === 0) {
+      showToast('error', 'Cadastre ao menos um cliente e um preset antes de criar pedidos.')
+      return
+    }
+
+    setEditing(null)
+    setFormError('')
+    setForm(emptyForm())
+    setShowModal(true)
+  }
   const openEdit = (item: Order) => {
     setEditing(item)
+    setFormError('')
     setForm({ customer_id: item.customer_id, preset_id: item.preset_id, title: item.title, theme: item.theme, event_date: item.event_date, delivery_date: item.delivery_date, size_label: item.size_label, servings: item.servings, sale_price: item.sale_price, deposit_amount: item.deposit_amount, status: item.status, payment_status: item.payment_status, notes: item.notes, custom_adjustments: item.custom_adjustments, display_order: item.display_order })
     setShowModal(true)
   }
 
   const handleSave = async () => {
-    if (!(form.title as string)?.trim()) return
+    const title = (form.title as string)?.trim() || ''
+    const customerId = (form.customer_id as string) || ''
+    const presetId = (form.preset_id as string) || ''
+
+    if (!title) {
+      setFormError('Informe o título do pedido.')
+      return
+    }
+
+    if (!customerId) {
+      setFormError('Selecione um cliente.')
+      return
+    }
+
+    if (!presetId) {
+      setFormError('Selecione um preset. Os pedidos dependem de um preset válido.')
+      return
+    }
     
     // Validação: data de entrega deve ser antes ou igual à data do evento
     const eventDate = form.event_date as string
@@ -85,18 +128,30 @@ export default function PedidosPage() {
     }
     
     setSaving(true)
+    setFormError('')
     try {
+      const payload = {
+        ...form,
+        title,
+        customer_id: customerId,
+        preset_id: presetId,
+      }
+
       if (editing) {
-        const { error } = await supabase.from('orders').update(form).eq('id', editing.id)
+        const { error } = await supabase.from('orders').update(payload).eq('id', editing.id)
         if (error) throw error
         showToast('success', 'Pedido atualizado!')
       } else {
-        const { error } = await supabase.from('orders').insert({ ...form, id: crypto.randomUUID() })
+        const { error } = await supabase.from('orders').insert({ ...payload, id: crypto.randomUUID() })
         if (error) throw error
         showToast('success', 'Pedido criado!')
       }
       setShowModal(false); load()
-    } catch { showToast('error', 'Erro ao salvar') } finally { setSaving(false) }
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Erro ao salvar pedido')
+      setFormError(message)
+      showToast('error', message)
+    } finally { setSaving(false) }
   }
 
   const handleDelete = async (id: string) => {
@@ -119,6 +174,14 @@ export default function PedidosPage() {
     <div className="page-container">
       {toast && <div className={`toast toast-${toast.type}`}>{toast.message}</div>}
       <div className="page-header"><div><h1>Pedidos</h1><p>Gerencie os pedidos da confeitaria</p></div><button className="btn btn-primary" onClick={openNew}><Plus size={18} /> Novo Pedido</button></div>
+      {!loading && (customers.length === 0 || presets.length === 0) && (
+        <div className="card" style={{ marginBottom: 20, borderColor: 'var(--warning-500)', background: 'var(--warning-50)' }}>
+          <div className="card-body" style={{ padding: 16 }}>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>Pré-requisitos para criar pedidos</div>
+            <div className="text-sm text-muted">Cadastre pelo menos um cliente e um preset na Calculadora antes de criar novos pedidos.</div>
+          </div>
+        </div>
+      )}
       <div style={{ marginBottom: 20 }}><div className="search-bar"><Search size={18} /><input placeholder="Buscar pedido..." value={search} onChange={e => setSearch(e.target.value)} /></div></div>
 
       {loading ? <div className="table-container">{[1,2,3].map(i => <div key={i} style={{ padding: '14px 16px', borderBottom: '1px solid var(--border-light)' }}><div className="skeleton" style={{ width: '50%', height: 16, marginBottom: 8 }} /></div>)}</div> : filtered.length === 0 ? (
@@ -145,12 +208,13 @@ export default function PedidosPage() {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal" style={{ maxWidth: 640 }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h2>{editing ? 'Editar Pedido' : 'Novo Pedido'}</h2><button className="btn btn-ghost btn-icon" onClick={() => setShowModal(false)}><X size={20} /></button></div>
+            <div className="modal-header"><h2>{editing ? 'Editar Pedido' : 'Novo Pedido'}</h2><button className="btn btn-ghost btn-icon" onClick={() => { setFormError(''); setShowModal(false) }}><X size={20} /></button></div>
             <div className="modal-body">
+              {formError && <div className="form-error" style={{ marginBottom: 16 }}>{formError}</div>}
               <div className="form-group"><label className="form-label">Título *</label><input className="form-input" value={(form.title as string) || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Bolo de Casamento" /></div>
               <div className="form-row">
-                <div className="form-group"><label className="form-label">Cliente</label><select className="form-select" value={(form.customer_id as string) || ''} onChange={e => setForm({ ...form, customer_id: e.target.value })}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
-                <div className="form-group"><label className="form-label">Preset</label><select className="form-select" value={(form.preset_id as string) || ''} onChange={e => setForm({ ...form, preset_id: e.target.value })}><option value="">Selecione...</option>{presets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Cliente *</label><select className="form-select" value={(form.customer_id as string) || ''} onChange={e => setForm({ ...form, customer_id: e.target.value })}><option value="">Selecione...</option>{customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+                <div className="form-group"><label className="form-label">Preset *</label><select className="form-select" value={(form.preset_id as string) || ''} onChange={e => setForm({ ...form, preset_id: e.target.value })}><option value="">Selecione...</option>{presets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}</select></div>
               </div>
               <div className="form-group"><label className="form-label">Tema</label><input className="form-input" value={(form.theme as string) || ''} onChange={e => setForm({ ...form, theme: e.target.value })} /></div>
               <div className="form-row">
@@ -183,7 +247,7 @@ export default function PedidosPage() {
               </div>
               <div className="form-group"><label className="form-label">Observações</label><textarea className="form-textarea" value={(form.notes as string) || ''} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
             </div>
-            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button><button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Salvando...' : editing ? 'Atualizar' : 'Criar'}</button></div>
+            <div className="modal-footer"><button className="btn btn-secondary" onClick={() => { setFormError(''); setShowModal(false) }}>Cancelar</button><button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Salvando...' : editing ? 'Atualizar' : 'Criar'}</button></div>
           </div>
         </div>
       )}

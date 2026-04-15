@@ -137,7 +137,40 @@ export function formatCurrencyInput(value: number | string): string {
  * Parse currency string to number (removes formatting)
  */
 export function parseCurrencyInput(value: string): number {
-  return Number(value.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')) || 0
+  const cleaned = value.trim().replace(/[^\d,.-]/g, '')
+  if (!cleaned) return 0
+
+  const lastComma = cleaned.lastIndexOf(',')
+  const lastDot = cleaned.lastIndexOf('.')
+  const separatorIndex = Math.max(lastComma, lastDot)
+
+  if (separatorIndex === -1) {
+    return Number(cleaned.replace(/\D/g, '')) || 0
+  }
+
+  const integerPart = cleaned.slice(0, separatorIndex).replace(/[^\d-]/g, '')
+  const decimalPart = cleaned.slice(separatorIndex + 1).replace(/\D/g, '')
+  const normalized = `${integerPart || '0'}.${decimalPart}`
+
+  return Number(normalized) || 0
+}
+
+/**
+ * Extract a useful message from an unknown error value.
+ */
+export function getErrorMessage(error: unknown, fallback = 'Erro desconhecido'): string {
+  if (error instanceof Error && error.message.trim()) {
+    return error.message
+  }
+
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) {
+      return message
+    }
+  }
+
+  return fallback
 }
 
 /**

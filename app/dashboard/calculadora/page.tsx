@@ -2,37 +2,23 @@
 
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Calculator, ChevronDown, ChevronRight, Plus, Trash2, Printer, Save, BookOpen, X } from 'lucide-react'
+import { ChevronDown, ChevronRight, Plus, Trash2, Printer, Save, BookOpen, X } from 'lucide-react'
 import {
-  formatCurrency, calculateItemCost, calculateSectionCost, calculatePricing,
+  formatCurrency, calculateItemCost, calculatePricing,
   RECIPE_SECTIONS, uid,
   type Ingredient, type RecipeItem, type PricingBreakdown,
+  getErrorMessage,
 } from '@/lib/utils'
 
 interface Recipe {
   id: string; name: string; category: string; size_label: string; yield_label: string; items: RecipeItem[]
 }
 
-interface BakerySettings {
-  default_markup_pct: number; labor_hour_rate: number; monthly_fixed_cost: number
-  monthly_order_goal: number; packaging_cost_default: number; delivery_cost_default: number
-}
-
 interface ExtraItem { uid: string; name: string; cost: number }
-
-const defaultSettings: BakerySettings = {
-  default_markup_pct: 50,
-  labor_hour_rate: 0,
-  monthly_fixed_cost: 0,
-  monthly_order_goal: 1,
-  packaging_cost_default: 0,
-  delivery_cost_default: 0,
-}
 
 export default function CalculadoraPage() {
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
-  const [settings, setSettings] = useState<BakerySettings>(defaultSettings)
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ type: string; message: string } | null>(null)
 
@@ -53,6 +39,7 @@ export default function CalculadoraPage() {
   const [savingPreset, setSavingPreset] = useState(false)
   const [presetName, setPresetName] = useState('')
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [presetError, setPresetError] = useState('')
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -77,7 +64,6 @@ export default function CalculadoraPage() {
     setIngredients(ingredientsRes.data || [])
     if (settingsRes.data) {
       const s = settingsRes.data
-      setSettings(s)
       setLaborRate(s.labor_hour_rate)
       setFixedCost(s.monthly_fixed_cost)
       setOrderGoal(s.monthly_order_goal || 1)
@@ -139,10 +125,21 @@ export default function CalculadoraPage() {
   }
 
   const handleSavePreset = async () => {
-    if (!presetName.trim() || !selectedRecipe || !pricing) return
+    if (!presetName.trim()) {
+      setPresetError('Informe um nome para o preset.')
+      return
+    }
+
+    if (!selectedRecipe || !pricing) {
+      setPresetError('Selecione uma receita antes de salvar.')
+      return
+    }
+
     setSavingPreset(true)
+    setPresetError('')
+
     try {
-      await supabase.from('calculator_presets').insert({
+      const { error } = await supabase.from('calculator_presets').insert({
         id: crypto.randomUUID(),
         name: presetName,
         recipe_id: selectedRecipe.id,
@@ -158,10 +155,19 @@ export default function CalculadoraPage() {
         notes: `Preço sugerido: ${formatCurrency(pricing.suggestedPrice)} | Lucro: ${formatCurrency(pricing.profit)}`,
         display_order: 0,
       })
+
+      if (error) throw error
+
       showToast('success', 'Preset salvo!')
       setShowSaveModal(false)
       setPresetName('')
-    } catch { showToast('error', 'Erro ao salvar') } finally { setSavingPreset(false) }
+    } catch (err: unknown) {
+      const message = getErrorMessage(err, 'Erro ao salvar preset')
+      setPresetError(message)
+      showToast('error', message)
+    } finally {
+      setSavingPreset(false)
+    }
   }
 
   const handlePrint = () => {
@@ -190,7 +196,7 @@ export default function CalculadoraPage() {
           {pricing && (
             <>
               <button className="btn btn-secondary" onClick={handlePrint}><Printer size={16} /> Imprimir</button>
-              <button className="btn btn-primary" onClick={() => { setPresetName(selectedRecipe?.name || ''); setShowSaveModal(true) }}><Save size={16} /> Salvar Preset</button>
+              <button className="btn btn-primary" onClick={() => { setPresetName(selectedRecipe?.name || ''); setPresetError(''); setShowSaveModal(true) }}><Save size={16} /> Salvar Preset</button>
             </>
           )}
         </div>
@@ -522,6 +528,7 @@ export default function CalculadoraPage() {
                 <label className="form-label">Nome do Preset</label>
                 <input className="form-input" value={presetName} onChange={e => setPresetName(e.target.value)} placeholder="Ex: Bolo 20cm Chocolate" />
               </div>
+              {presetError && <div className="form-error" style={{ marginTop: 0, marginBottom: 12 }}>{presetError}</div>}
             </div>
             <div className="modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowSaveModal(false)}>Cancelar</button>

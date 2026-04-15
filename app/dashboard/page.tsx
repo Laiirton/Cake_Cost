@@ -3,8 +3,8 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  ShoppingBag, Users, DollarSign, TrendingUp, Calendar, Clock,
-  BookOpen, Wheat, ArrowRight, AlertCircle,
+  ShoppingBag, Users, DollarSign, TrendingUp, Clock,
+  BookOpen, ArrowRight, AlertCircle,
 } from 'lucide-react'
 import Link from 'next/link'
 import { formatCurrency, calculateRecipeTotalCost, formatDate, formatDateTime, type Ingredient, type RecipeItem } from '@/lib/utils'

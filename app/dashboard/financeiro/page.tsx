@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, Search, Pencil, Trash2, X, DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
-import { formatCurrency, formatDate, parseCurrencyInput, formatCurrencyInput } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import CurrencyInput from '@/app/dashboard/components/CurrencyInput'
 
 interface CashEntry {
@@ -25,6 +25,7 @@ export default function FinanceiroPage() {
   const [form, setForm] = useState<Record<string, unknown>>({})
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ type: string; message: string } | null>(null)
+  const [period, setPeriod] = useState<'all' | 'month'>('all')
   const supabase = useMemo(() => createClient(), [])
 
   const load = useCallback(async () => {
@@ -36,6 +37,23 @@ export default function FinanceiroPage() {
   useEffect(() => { load() }, [load])
 
   const showToast = (type: string, message: string) => { setToast({ type, message }); setTimeout(() => setToast(null), 3000) }
+
+  const currentMonthLabel = new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date())
+
+  const monthBounds = useMemo(() => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
+    return { start, end }
+  }, [])
+
+  const scopedItems = useMemo(() => {
+    if (period === 'all') return items
+    return items.filter(item => item.occurred_on >= monthBounds.start && item.occurred_on <= monthBounds.end)
+  }, [items, monthBounds.end, monthBounds.start, period])
 
   const openNew = () => { setEditing(null); setForm({ kind: 'income', category: '', description: '', amount: 0, occurred_on: new Date().toISOString().split('T')[0], order_id: null, display_order: 0 }); setShowModal(true) }
   const openEdit = (item: CashEntry) => { setEditing(item); setForm({ kind: item.kind, category: item.category, description: item.description, amount: item.amount, occurred_on: item.occurred_on, order_id: item.order_id, display_order: item.display_order }); setShowModal(true) }
@@ -69,14 +87,14 @@ export default function FinanceiroPage() {
     }
   }
 
-  const filtered = items.filter(i => {
+  const filtered = scopedItems.filter(i => {
     const matchSearch = i.description.toLowerCase().includes(search.toLowerCase()) || i.category.toLowerCase().includes(search.toLowerCase())
     const matchKind = filterKind === 'all' || i.kind === filterKind
     return matchSearch && matchKind
   })
 
-  const totalIncome = items.filter(i => i.kind === 'income').reduce((s, i) => s + i.amount, 0)
-  const totalExpense = items.filter(i => i.kind === 'expense').reduce((s, i) => s + i.amount, 0)
+  const totalIncome = scopedItems.filter(i => i.kind === 'income').reduce((s, i) => s + i.amount, 0)
+  const totalExpense = scopedItems.filter(i => i.kind === 'expense').reduce((s, i) => s + i.amount, 0)
   const balance = totalIncome - totalExpense
 
   return (
@@ -88,6 +106,26 @@ export default function FinanceiroPage() {
         <div className="stat-card"><div className="stat-icon"><TrendingUp size={24} /></div><div className="stat-value" style={{ color: 'var(--success-600)' }}>{formatCurrency(totalIncome)}</div><div className="stat-label">Receitas</div></div>
         <div className="stat-card"><div className="stat-icon"><TrendingDown size={24} /></div><div className="stat-value" style={{ color: 'var(--danger-500)' }}>{formatCurrency(totalExpense)}</div><div className="stat-label">Despesas</div></div>
         <div className="stat-card"><div className="stat-icon"><DollarSign size={24} /></div><div className="stat-value" style={{ color: balance >= 0 ? 'var(--success-600)' : 'var(--danger-500)' }}>{formatCurrency(balance)}</div><div className="stat-label">Saldo</div></div>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
+        <div className="text-sm text-muted">
+          Período atual: {period === 'all' ? 'Todos os lançamentos' : `Este mês (${currentMonthLabel})`}
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {[
+            { value: 'all', label: 'Todos' },
+            { value: 'month', label: 'Este mês' },
+          ].map(option => (
+            <button
+              key={option.value}
+              className={`btn btn-sm ${period === option.value ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setPeriod(option.value as 'all' | 'month')}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>

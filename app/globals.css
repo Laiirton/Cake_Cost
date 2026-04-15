@@ -466,6 +466,38 @@ h5 { font-size: 1rem; }
   margin-top: 4px;
 }
 
+.currency-field {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+}
+
+.currency-field-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  border: 1px solid var(--border-default);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  background: var(--gray-50);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.currency-field-input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.currency-field:focus-within .currency-field-prefix {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+}
+
 /* ==================== TABLE ==================== */
 .table-container {
   overflow-x: auto;
