@@ -6,6 +6,7 @@ import { login } from './actions'
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
@@ -42,15 +43,45 @@ export default function LoginPage() {
 
           <div className="form-group">
             <label className="form-label" htmlFor="password">Senha</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              className="form-input"
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                className="form-input"
+                placeholder="••••••••"
+                required
+                autoComplete="current-password"
+                style={{ paddingRight: '44px' }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                className="password-toggle"
+                style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--muted-foreground, #9ca3af)',
+                  fontSize: '1.1rem',
+                  padding: '4px',
+                  lineHeight: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  borderRadius: '4px',
+                  outline: 'none',
+                }}
+                onMouseDown={(e) => e.preventDefault()}
+              >
+                {showPassword ? '👁️‍🗨️' : '👁️'}
+              </button>
+            </div>
           </div>
 
           <button
